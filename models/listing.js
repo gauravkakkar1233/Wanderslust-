@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const review = require("./review");
 const Schema=mongoose.Schema;
 async function main() {
     mongoose.connect("mongodb://127.0.0.1/wanderlust");
@@ -31,7 +32,13 @@ main()
     },
     country:{
         type:String
-    }
+    },
+    reviews:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:"Review"
+        }
+    ]
 });
 const Listing=mongoose.model('Listing',listingSchema);
 

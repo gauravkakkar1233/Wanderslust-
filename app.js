@@ -49,7 +49,7 @@ app.get("/listings", wrapasync(async (req, res) => {
     const alllistings = await Listing.find({});
     res.render("listings/index.ejs", { alllistings });
 }));
-const validateschema = (req, res, next => {
+const validateschema = ((req, res, next) => {
     let {error} = listingschema.validate(req.body);
     // console.log(result);
     if (error) {
@@ -60,7 +60,7 @@ const validateschema = (req, res, next => {
     {
         next();
     }
-});
+})
 // CREATE NEW ROUTE (FIXED)
 app.get("/listings/new", (req, res) => {
     res.render("listings/new.ejs");
