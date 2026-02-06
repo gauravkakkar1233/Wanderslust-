@@ -7,7 +7,10 @@ const ejsmate = require("ejs-mate");
 const methodoverride = require("method-override");
 const Listing = require("./models/listing.js");
 const ExpressError = require("./utils/ExpressError.js");
-const { listingschema } = require("./schema.js");
+const { listingschema } = require("./schema.js"); //FOR USING JOI 
+const { reviewschema } = require('./schema.js');
+const Review = require('./models/review.js');
+
 async function main() {
     mongoose.connect("mongodb://127.0.0.1/wanderlust");
 }
@@ -49,25 +52,38 @@ app.get("/listings", wrapasync(async (req, res) => {
     const alllistings = await Listing.find({});
     res.render("listings/index.ejs", { alllistings });
 }));
+// FOR USING JOI TO DO SERVER SIDE SCRIPTING(LISTING SCHEMA)
 const validateschema = ((req, res, next) => {
-    let {error} = listingschema.validate(req.body);
+    let { error } = listingschema.validate(req.body);
     // console.log(result);
     if (error) {
-        let errmsg=error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(404, errmsg);
+        let errmsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errmsg);
+
     }
-    else
-    {
+    else {
         next();
     }
-})
+});
+const validatereview=(req,res,next)=>{
+    let {error}=reviewschema.validate(req.body);
+    if(error)
+    {
+        let errmsg = error.details.map(el => el.message).join(",");
+
+        throw new ExpressError(400,errmsg);
+    }
+    else{
+        next();
+    }
+};
 // CREATE NEW ROUTE (FIXED)
 app.get("/listings/new", (req, res) => {
     res.render("listings/new.ejs");
     // res.send("NEW ROUTE IS WORKING");
 });
 //new route 
-app.post("/listings",validateschema, wrapasync(async (req, res, next) => {
+app.post("/listings", validateschema, wrapasync(async (req, res, next) => {
     // let {title,description,image,price,location,country}=req.body;
     // console.log({title,description,image,price,location,country}); 
 
@@ -82,7 +98,7 @@ app.post("/listings",validateschema, wrapasync(async (req, res, next) => {
 // SHOW ROUTE (keep after /new)
 app.get("/listings/:id", wrapasync(async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs", { listing });
 }));
 // EDIT ROUTE
@@ -92,14 +108,14 @@ app.get("/listings/:id/edit", wrapasync(async (req, res) => {
     res.render("listings/edit.ejs", { listing });
 }));
 // UPDATE ROUTE 
-app.put("/listings/:id",validateschema, wrapasync(async (req, res) => {
+app.put("/listings/:id", validateschema, wrapasync(async (req, res) => {
     let { id } = req.params;
     let listing = req.body.listing;
     // let listing = req.body.listing;
     // console.log(listing);
     let updatelisting = await Listing.findByIdAndUpdate(id, listing, { new: true });
     console.log(updatelisting);
-    res.redirect(`/Listings/${id}`);
+    res.redirect(`/listings/${id}`);
     // res.send("the edit route is workin1g");
 }));
 app.delete("/listings/:id", wrapasync(async (req, res) => {
@@ -108,7 +124,19 @@ app.delete("/listings/:id", wrapasync(async (req, res) => {
     console.log(listing);
     res.redirect("/listings");
 }));
+// REVIEWS ROUTE 
+//POST ROUTES TO ADD A NEW REVIEW
+app.post("/listings/:id/reviews",validatereview,wrapasync(async (req, res, next) => {
+    let { id } = req.params;
+    let listing = await Listing.findById(id);
+    let newreview = new Review(req.body.review);//After the show .ejs form is submitted
+    listing.reviews.push(newreview);
+    await newreview.save();
+    await listing.save(); //ASYNC SAVE FUNCTION 
+    // res.send("new review saved ");
+    res.redirect(`/listings/${id}`);
 
+}));
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
 });
