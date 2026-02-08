@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const review = require("./review");
+const Review = require("./review");
+const { listingschema } = require("../schema");
 const Schema=mongoose.Schema;
 async function main() {
     mongoose.connect("mongodb://127.0.0.1/wanderlust");
@@ -40,6 +41,12 @@ main()
         }
     ]
 });
+listingSchema.post("findOneAndDelete", async (listing) => {
+    if (listing) {
+        await Review.deleteMany({ _id: { $in: listing.reviews } });
+    }
+});
+
 const Listing=mongoose.model('Listing',listingSchema);
 
 module.exports=Listing;
