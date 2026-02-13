@@ -5,9 +5,11 @@ const path = require("path");
 const ejsmate = require("ejs-mate");
 const methodoverride = require("method-override");
 const ExpressError = require("./utils/ExpressError.js");
+const session=require("express-session");
+const flash=require("connect-flash");
 
-const listing = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+
+const { resolveAny } = require("dns");
 
 async function main() {
     mongoose.connect("mongodb://127.0.0.1/wanderlust");
@@ -28,11 +30,34 @@ app.use(methodoverride("_method"));
 app.engine('ejs', ejsmate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+const sessionoptions={
+    secret:"mysupersecret",
+    reasave:false,
+    saveUnitialized:true,
+    cookie:{
+        expires:Date.now()+7*24*60*60*1000,
+        maxAge:7*24*60*60+1000,
+        httpOnly:true
+    }
+};
+app.use(session(sessionoptions));
+app.use(flash());
+
+const listing = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
+// HOME ROUTE
 app.get("/", (req, res) => {
     console.log("Home route is working");
 });
 
 
+app.use((req,res,next)=>{
+    res.locals.message=req.flash("success");
+    res.locals.error=req.flash("faliure");
+    
+    console.log(res.locals.message)
+    next();
+})
 // LISTING ROUTES
 app.use("/listings", listing);
 
