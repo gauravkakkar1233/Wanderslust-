@@ -4,10 +4,13 @@ if (process.env.NODE_ENV !== "production") {
 
 const express = require("express");
 const app = express();
+
 const mongoose = require("mongoose");
 const path = require("path");
+
 const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
+
 const ExpressError = require("./utils/ExpressError.js");
 
 const session = require("express-session");
@@ -42,60 +45,77 @@ main()
 // ---------------- APP CONFIG ----------------
 
 app.set("view engine", "ejs");
+
 app.set("views", path.join(__dirname, "views"));
 
 app.engine("ejs", ejsMate);
 
 app.use(express.urlencoded({ extended: true }));
+
 app.use(methodOverride("_method"));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// ---------------- SESSION CONFIG ----------------
+// ---------------- SESSION STORE ----------------
 
 const store = MongoStore.create({
     mongoUrl: db_url,
+
     crypto: {
-        secret: process.env.SECRET,
+        secret: process.env.SECRET || "mysupersecret",
     },
+
     touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
-    console.log("ERROR in Mongo SESSION STORE", err);
+store.on("error", (err) => {
+    console.log("SESSION STORE ERROR:", err);
 });
+
+// ---------------- SESSION CONFIG ----------------
 
 const sessionOptions = {
     store,
-    secret: process.env.SECRET,
+
+    secret: process.env.SECRET || "mysupersecret",
+
     resave: false,
+
     saveUninitialized: false,
 
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+
         maxAge: 7 * 24 * 60 * 60 * 1000,
+
         httpOnly: true,
     },
 };
 
 app.use(session(sessionOptions));
+
 app.use(flash());
 
 // ---------------- PASSPORT CONFIG ----------------
 
 app.use(passport.initialize());
+
 app.use(passport.session());
 
 passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
+
 passport.deserializeUser(User.deserializeUser());
 
-// ---------------- GLOBAL LOCALS ----------------
+// ---------------- GLOBAL VARIABLES ----------------
 
 app.use((req, res, next) => {
+
     res.locals.success = req.flash("success");
+
     res.locals.error = req.flash("error");
+
     res.locals.currUser = req.user;
 
     next();
@@ -104,7 +124,9 @@ app.use((req, res, next) => {
 // ---------------- ROUTES ----------------
 
 const listingRouter = require("./routes/listing.js");
+
 const reviewRouter = require("./routes/review.js");
+
 const userRouter = require("./routes/users.js");
 
 app.use("/", userRouter);
@@ -119,8 +141,13 @@ app.get("/favicon.ico", (req, res) => {
     res.status(204).end();
 });
 
+// ---------------- HOME ROUTE ----------------
+
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 // ---------------- 404 HANDLER ----------------
-// FIXED FOR EXPRESS 5
 
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found"));
@@ -132,7 +159,9 @@ app.use((err, req, res, next) => {
 
     console.log(err);
 
-    let { statusCode = 500, message = "Something Went Wrong" } = err;
+    let { statusCode = 500 } = err;
+
+    let { message = "Something Went Wrong" } = err;
 
     res.status(statusCode).render("listings/error.ejs", {
         err,
