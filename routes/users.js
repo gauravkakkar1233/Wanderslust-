@@ -1,36 +1,33 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user.js");
-const wrapasync = require("../utils/wrapasync.js");
+
 const passport = require("passport");
+const wrapasync = require("../utils/wrapasync.js");
 const { saveRedirectUrl } = require("../middleware.js");
 
-const userController=require("../controllers/users.js");
-const user = require("../models/user.js");
+const userController = require("../controllers/users.js");
 
+// ---------------- SIGNUP ----------------
 
-// SIGNUP REQUEST
-router
-.route("/signup")
-.get(userController.renderSignupForm)//signup form
-.post(wrapasync(userController.signup));//Signup logic
+router.route("/signup")
+    .get(userController.renderSignupForm)
+    .post(wrapasync(userController.signup));
 
+// ---------------- LOGIN ----------------
 
-// LOGIN REQUEST
-router
-.route("/login")
-.get(userController.renderLoginForm)
-.post(saveRedirectUrl,
-    passport.authenticate("local",
-    {
-        failureRedirect: "/login",
-        failureFlash: true,
-    }),
-    wrapasync(userController.login));
+router.route("/login")
+    .get(userController.renderLoginForm)
+    .post(
+        saveRedirectUrl,
+        passport.authenticate("local", {
+            failureRedirect: "/login",
+            failureFlash: true,
+        }),
+        userController.login
+    );
 
-// LOGOUT ROUTE
-router.get("/logout", userController.logout)
+// ---------------- LOGOUT ----------------
 
-
+router.get("/logout", userController.logout);
 
 module.exports = router;

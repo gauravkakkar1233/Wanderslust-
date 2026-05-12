@@ -1,47 +1,68 @@
-const User=require("../models/user");
-const Listing=require("../models/listing");
+const User = require("../models/user");
 
-module.exports.renderSignupForm=(req, res) => {
+// ---------------- SIGNUP ----------------
+
+module.exports.renderSignupForm = (req, res) => {
     res.render("users/signup.ejs");
-}
+};
 
-module.exports.signup=async (req, res) => {
+module.exports.signup = async (req, res, next) => {
     try {
-        let { username, email, password } = req.body;
-        const newuser = new User({ email, username });
-        const registeruser = await User.register(newuser, password);
-        console.log(registeruser);
-        req.login(registeruser, (err) => {
-            if (err) {
-                return next(err);
-            }
-            req.flash("success", "Welcome to Wanderlust");
-            res.redirect("/listings");
-        })
-    }
-    catch (error) {
-        req.flash("error", error.message);
-        res.redirect('/signup');
-    }
-}
+        const { username, email, password } = req.body;
 
-module.exports.renderLoginForm=(req, res) => {
+        const newUser = new User({ email, username });
+
+        const registeredUser = await User.register(newUser, password);
+
+        // AUTO LOGIN AFTER SIGNUP
+        req.login(registeredUser, (err) => {
+            if (err) return next(err);
+
+            req.flash("success", "Welcome to Wanderlust!");
+
+            // Save session before redirect so it persists
+            req.session.save((err) => {
+                if (err) return next(err);
+                res.redirect("/listings");
+            });
+        });
+
+    } catch (e) {
+        req.flash("error", e.message);
+        res.redirect("/signup");
+    }
+};
+
+// ---------------- LOGIN ----------------
+
+module.exports.renderLoginForm = (req, res) => {
     res.render("users/login.ejs");
-}
+};
 
-module.exports.login=async (req, res) => {
-    req.flash("success", "Welcome Back! You are logged in!");
-    let redirect=res.locals.redirectUrl || "/listings";
-    res.redirect(redirect);
+module.exports.login = (req, res, next) => {
+    req.flash("success", "Welcome back!");
 
-}
+    let redirectUrl = res.locals.redirectUrl || "/listings";
 
-module.exports.logout=(req, res, next) => {
+    // Save session before redirect so it persists
+    req.session.save((err) => {
+        if (err) return next(err);
+        res.redirect(redirectUrl);
+    });
+};
+
+// ---------------- LOGOUT ----------------
+
+module.exports.logout = (req, res, next) => {
     req.logout((err) => {
-        if (err) {
-            next(err);
-        }
-        req.flash("success", "you are logout now!");
-        res.redirect("/listings");
-    })
-}
+        if (err) return next(err);
+
+        req.flash("success", "Logged out successfully");
+
+        // Save session before redirect so it persists
+        req.session.save((err) => {
+            if (err) return next(err);
+            res.redirect("/listings");
+        });
+    });
+};

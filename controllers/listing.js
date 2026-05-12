@@ -26,23 +26,19 @@ module.exports.showListing=async (req, res) => {
     res.render("listings/show.ejs", { listing });
 }
 module.exports.createListing=async (req, res, next) => {
-    // let {title,description,image,price,location,country}=req.body;
-    // console.log({title,description,image,price,location,country}); 
-
     let listing = req.body.listing;
-    let url=req.file.path;
-    let filename=req.file.filename;
-    console.log(url,filename);
-
-    console.log(listing);
     let newlisting1 = new Listing(listing);
     newlisting1.owner=req.user._id;
-    newlisting1.image.url=url;
-    newlisting1.image.filename=filename;
+
+    if (req.file) {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        newlisting1.image = { url, filename };
+    }
+
     await newlisting1.save();
     req.flash("success", "New Listing Created!!");
     res.redirect("/listings");
-    // res.send("new route is working");
 }
 module.exports.renderEditForm=async (req, res) => {
     let { id } = req.params;
@@ -51,9 +47,10 @@ module.exports.renderEditForm=async (req, res) => {
         req.flash("error", "Listing is not Valid!!!!");
         return res.redirect("/listings");
     }
-    let orginalImageUrl=listing.image.url;
-    orginalImageUrl=orginalImageUrl.replace("/upload","/upload/h_300,w_250");
-    res.render("listings/edit.ejs", { listing,orginalImageUrl });
+    let orginalImageUrl = listing.image && listing.image.url
+        ? listing.image.url.replace("/upload", "/upload/h_300,w_250")
+        : "";
+    res.render("listings/edit.ejs", { listing, orginalImageUrl });
 }
 module.exports.updateListing = async (req, res) => {
     let { id } = req.params;

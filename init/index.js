@@ -24,7 +24,7 @@ const initdb = async () => {
   // add owner to each listing
   const dataWithOwner = initdata.data.map((obj) => ({
     ...obj,
-    owner: new mongoose.Types.ObjectId("681f2b3c8f1d6e7a12345678"),
+    owner: new mongoose.Types.ObjectId("6a02ed0d373be6742783ff9f"),
   }));
 
   // insert data

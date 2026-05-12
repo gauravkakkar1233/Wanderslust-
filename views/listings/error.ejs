@@ -1,13 +1,7 @@
-<% layout("/layouts/boilerplate.ejs") %>
+<% layout("/layouts/boilerplate.ejs") -%>
 
-<div class="row">
-    <div class="alert alert-danger col-6 offset-3" role="alert">
-        <h4 class="alert-heading">
-            Error <%= err.statusCode %>
-        </h4>
-
-        <p>
-            <%= err.message %>
-        </p>
-    </div>
+<div style="text-align:center; margin-top:100px;">
+    <h1>Error <%= typeof statusCode !== 'undefined' ? statusCode : 500 %></h1>
+    <p><%= message || "Something went wrong!" %></p>
+    <a href="/listings" class="btn btn-dark mt-3">Go Back to Listings</a>
 </div>
