@@ -6,20 +6,26 @@ An Airbnb-inspired full-stack web application where users can explore, create, e
 
 ## 🚀 Live Demo
 
-🔗 GitHub Repository:  
-https://github.com/gauravkakkar1233/Wanderslust-
+🌐 [Visit Wanderlust Live](https://wanderslust-od3t.onrender.com)
 
+📂 [GitHub Repository](https://github.com/gauravkakkar1233/Wanderslust-)
 ---
 
 ## ✨ Features
 
 - 🏡 Create, edit, and delete listings
-- ✅ Server-side validation using Joi
+- 🔐 User Authentication & Authorization
+- 👤 User signup, login, and logout
+- ⭐ Ratings & Review System
+- 📝 Users can add and delete reviews
+- ☁️ Cloud-based image uploads using Cloudinary
 - 🖼️ Image URL handling with fallback images
+- ✅ Server-side validation using Joi
 - 🔁 RESTful routing
 - ⚠️ Custom error handling middleware
 - 🎨 Responsive UI using Bootstrap
 - 📂 MVC project structure
+- 💬 Flash messages for success & error handling
 
 ---
 
@@ -39,10 +45,18 @@ https://github.com/gauravkakkar1233/Wanderslust-
 - MongoDB
 - Mongoose
 
+### Authentication & Authorization
+- Passport.js
+- Passport Local Strategy
+- Express Session
+
+### Cloud Services
+- Cloudinary
+- Multer
+
 ### Validation & Utilities
 - Joi
 - Method-Override
-- Express Sessions
 - Connect Flash
 
 ---
@@ -116,11 +130,13 @@ CLOUD_API_SECRET=your_cloudinary_api_secret
 
 ## 📌 Future Improvements
 
-- 🔐 User authentication & authorization
-- ☁️ Cloud image uploads
-- ⭐ Reviews & ratings system
 - 📍 Interactive maps integration
 - ❤️ Wishlist/Favorites feature
+- 🔎 Advanced search & filtering
+- 📱 Improved mobile responsiveness
+- 🌐 Social login (Google authentication)
+- 💬 Real-time chat between users
+- 🗂️ Booking & reservation system
 
 ---
 
