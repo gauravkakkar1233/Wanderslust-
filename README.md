@@ -108,13 +108,9 @@ CLOUD_API_SECRET=your_cloudinary_api_secret
 
 ## 📸 Screenshots
 
-
-```md
-<h3>Home Page</h3>
+<h3>🏠 Home Page</h3>
 
 <img width="1000" alt="Home Page" src="https://github.com/user-attachments/assets/8efe79ce-b2c8-424a-a173-59465e34db41" />
-
-```
 
 ---
 
